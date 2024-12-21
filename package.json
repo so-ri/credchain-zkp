@@ -13,12 +13,14 @@
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@nomiclabs/hardhat-truffle5": "^2.0.7",
     "@nomiclabs/hardhat-web3": "^2.0.0",
-    "hardhat": "^2.11.1",
+    "hardhat": "^2.22.15",
     "web3": "^1.8.0"
   },
   "dependencies": {
     "big-integer": "^1.6.51",
+    "circomlib": "^2.0.5",
     "crypto-js": "^4.1.1",
-    "ethereumjs-util": "^7.1.5"
+    "ethereumjs-util": "^7.1.5",
+    "poseidon-lite": "^0.3.0"
   }
 }
