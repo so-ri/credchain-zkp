@@ -113,6 +113,7 @@ function App() {
 
 		// verification input
 	const [proofInput, setProofInput] = useState("");
+	const [verifierHolderAddress, setVerifierHolderAddress] = useState("");
 
 	// verification output
 	const [verificationResult, setVerificationResult] = useState("");
@@ -128,7 +129,26 @@ function App() {
 			const parsedProof = JSON.parse(proofInput);
 			const {proof, publicSignals} = parsedProof;
 
-			const isValid = await snarkjs.groth16.verify(verificationKey, publicSignals, proof);
+			// compose data to recompose Public Signals
+			const chainDIDContract = await didContract.methods.getInfo(verifierHolderAddress).call();
+			const chainDID = chainDIDContract[0];
+
+			let issuer = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+			let issuerToDecimalString = BigInt(issuer.toLowerCase()).toString(10);
+
+			const recomposedPublicSignals =
+				[
+					publicSignals[0],
+					issuerToDecimalString,
+					publicSignals[2],
+					chainDID
+				];
+
+			if (JSON.stringify(recomposedPublicSignals) !== JSON.stringify(publicSignals)) {
+				throw new Error("publicInputs mismatch! Proof invalid!");
+			}
+			
+			const isValid = await snarkjs.groth16.verify(verificationKey, recomposedPublicSignals, proof);
 
 			if (isValid) {
 				setVerificationResult("Proof is valid.");
@@ -231,6 +251,17 @@ function App() {
 				<div className='card'>
 					<h2>Verifier</h2>
 					<div>
+
+						<div className="form-row">
+							<label>Holder Address:</label>
+							<input
+								type="text"
+								value={verifierHolderAddress}
+								onChange={(e) => setVerifierHolderAddress(e.target.value)}
+								placeholder="Enter Holder Address input"
+							/>
+						</div>
+
 						<label>
 							Paste Proof Input including Public Signals: <br/>
 							<textarea
