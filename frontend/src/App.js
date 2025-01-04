@@ -2,7 +2,7 @@ import './App.css';
 
 import Web3 from 'web3';
 import { contractAbi, contractAddress } from './utils/constants';
-import {  useState } from 'react';
+import {  useState, useEffect } from 'react';
 import * as snarkjs  from "snarkjs";
 import { poseidon3 } from 'poseidon-lite'
 
@@ -21,6 +21,35 @@ const didContract = new web3.eth.Contract(contractAbi, contractAddress);
 // https://github.com/NomicFoundation/hardhat-boilerplate/tree/master/frontend 
 
 function App() {
+
+	/**
+	 *
+	 *    Prefetch files
+	 *
+	 * */
+
+	const [cachedWasm, setCachedWasm] = useState(null);
+	const [cachedZkey, setCachedZkey] = useState(null);
+
+	useEffect(() => {
+		async function prefetchFiles() {
+			try {
+				const circuitWasmBuffer = await fetch("/zkFiles/circuit.wasm").then(res => res.arrayBuffer());
+				const circuitWasm = new Uint8Array(circuitWasmBuffer);
+				setCachedWasm(circuitWasm);
+
+				const circuitFinalZkeyBuffer = await fetch("/zkFiles/circuit_final.zkey").then(res => res.arrayBuffer());
+				const circuitFinalZkey = new Uint8Array(circuitFinalZkeyBuffer);
+				setCachedZkey(circuitFinalZkey);
+
+				console.log("files preloaded");
+			} catch (error) {
+				console.error("failed prefetching files:", error);
+			}
+		}
+
+		prefetchFiles();
+	}, []);
 
 	/**
 	 *
@@ -80,16 +109,10 @@ function App() {
 				DID: chainDID
 			};
 
-			const circuitWasmBuffer = await fetch("/zkFiles/circuit.wasm").then(res => res.arrayBuffer());
-			const circuitWasm = new Uint8Array(circuitWasmBuffer);
-
-			const circuitFinalZkeyBuffer = await fetch("/zkFiles/circuit_final.zkey").then(res => res.arrayBuffer());
-			const circuitFinalZkey = new Uint8Array(circuitFinalZkeyBuffer);
-
 			const {proof, publicSignals} = await snarkjs.groth16.fullProve(
 				circuitInput,
-				circuitWasm,
-				circuitFinalZkey
+				cachedWasm,
+				cachedZkey
 			);
 
 			const proofData = {proof, publicSignals};
