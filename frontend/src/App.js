@@ -30,6 +30,7 @@ function App() {
 
 	const [cachedWasm, setCachedWasm] = useState(null);
 	const [cachedZkey, setCachedZkey] = useState(null);
+	const [verificationKey, setVerificationKey] = useState(null);
 
 	useEffect(() => {
 		async function prefetchFiles() {
@@ -41,6 +42,9 @@ function App() {
 				const circuitFinalZkeyBuffer = await fetch("/zkFiles/circuit_final.zkey").then(res => res.arrayBuffer());
 				const circuitFinalZkey = new Uint8Array(circuitFinalZkeyBuffer);
 				setCachedZkey(circuitFinalZkey);
+
+				const verification_key = await fetch("/zkFiles/verification_key.json").then((res) => res.json());
+				setVerificationKey(verification_key);
 
 				console.log("files preloaded");
 			} catch (error) {
@@ -147,7 +151,6 @@ function App() {
 
 			const startTime = performance.now();
 
-			const verificationKey = await fetch("/zkFiles/verification_key.json").then((res) => res.json());
 
 			const parsedProof = JSON.parse(proofInput);
 			const {proof, publicSignals} = parsedProof;
