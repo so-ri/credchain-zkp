@@ -10,8 +10,6 @@ template DIDValidation() {
     signal input now;
     signal input DID;
 
-    signal output isValid;
-
     component hash = Poseidon(3);
     hash.inputs[0] <== biometricTemplate;
     hash.inputs[1] <== issuer;
@@ -23,7 +21,8 @@ template DIDValidation() {
     eq.in[0] <== hash.out;
     eq.in[1] <== DID;
 
-    isValid <== eq.out;
+    // eq.out must be 1 (hash == DID)
+    eq.out === 1;
 }
 
 component main {public [issuer, now, DID]} = DIDValidation();

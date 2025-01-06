@@ -164,9 +164,8 @@ function App() {
 
 			const recomposedPublicSignals =
 				[
-					publicSignals[0],
 					issuerToDecimalString,
-					publicSignals[2],
+					publicSignals[1],
 					chainDID
 				];
 
